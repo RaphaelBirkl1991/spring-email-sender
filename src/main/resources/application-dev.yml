@@ -1,0 +1,16 @@
+#Database
+POSTGRES_SQL_USERNAME: postgres
+POSTGRES_SQL_PASSWORD: pass
+POSTGRES_SQL_HOST: localhost
+POSTGRES_SQL_PORT: 5432
+POSTGRES_SQL_DB: spmail
+
+ACTIVE_PROFILE: dev
+SERVER_PORT: 8080
+
+#Email Config
+EMAIL_HOST: smtp.gmail.com
+EMAIL_PORT: 587
+EMAIL_ID: raphael.birkl@gmail.com
+EMAIL_PASSWORD: brqojvknpunpakdf
+VERIFY_EMAIL_HOST: http://localhost:${SERVER_PORT}
