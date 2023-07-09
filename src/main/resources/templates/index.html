@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<br>
+<button id="sendButton">send Email</button>
+
+<script>
+    document.getElementById("sendButton").addEventListener("click", function() {
+        var user = {
+            name: "Raphael Birkl",
+            email: "raphael.birkl@gmail.com",
+            password: "123456",
+            enabled: true
+        };
+
+        fetch("/api/users", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(user)
+        })
+            .then(function(response) {
+                if (response.ok) {
+                    console.log("User created");
+                    // Hier können Sie weitere Aktionen durchführen, z.B. eine Erfolgsmeldung anzeigen
+                } else {
+                    console.log("Fehler beim Erstellen des Benutzers");
+                    // Hier können Sie entsprechend auf einen Fehler reagieren
+                }
+            })
+            .catch(function(error) {
+                console.log("Fehler beim Senden des Requests:", error);
+                // Hier können Sie entsprechend auf einen Fehler reagieren
+            });
+    });
+</script>
+</body>
+</html>
