@@ -1,8 +1,13 @@
 package io.getarrays.springemailsender.service.implementation;
 
 import io.getarrays.springemailsender.service.EmailService;
-import io.getarrays.springemailsender.utils.EmailUtils;
+import jakarta.activation.DataHandler;
+import jakarta.activation.DataSource;
+import jakarta.activation.FileDataSource;
+import jakarta.mail.BodyPart;
+import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMultipart;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -11,7 +16,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.ITemplateEngine;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
@@ -27,6 +31,7 @@ public class EmailServiceImpl implements EmailService {
     public static final String NEW_USER_ACCOUNT_VERIFICATION = "New User Account Verification";
     public static final String UTF_8_ENCODING = "UTF-8";
     public static final String EMAIL_TEMPLATE = "emailTemplate";
+    public static final String TEXT_HTML_ENCODING = "text/html";
     private final JavaMailSender emailSender;
     private final TemplateEngine templateEngine;
     @Value("${spring.mail.verify.host}")
@@ -129,6 +134,38 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendHtmlEmailWithEmbeddedFiles(String name, String to, String token) {
+        try {
+            MimeMessage message = getMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, UTF_8_ENCODING);
+            helper.setPriority(1);
+            helper.setSubject(NEW_USER_ACCOUNT_VERIFICATION);
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+         //   helper.setText(text, true);
+            Context context = new Context();
+            context.setVariables(Map.of("name", name, "url", getVerificationUrl(host, token)));
+            String text = templateEngine.process(EMAIL_TEMPLATE, context);
+
+            // Add HTML email body
+            MimeMultipart mimeMultipart = new MimeMultipart("related");
+            BodyPart messageBodyPart = new MimeBodyPart();
+            messageBodyPart.setContent(text, TEXT_HTML_ENCODING);
+            mimeMultipart.addBodyPart(messageBodyPart);
+
+            // Add Images to the Email Body
+            BodyPart imageBodyPart = new MimeBodyPart();
+            DataSource datasource = new FileDataSource(System.getProperty("user.home") + "/OneDrive/Desktop/sp-email/donkey.jpg");
+            imageBodyPart.setDataHandler(new DataHandler(datasource));
+            imageBodyPart.setHeader("Content-ID", "image");
+            mimeMultipart.addBodyPart(imageBodyPart);
+
+            message.setContent(mimeMultipart);
+
+            emailSender.send(message);
+         } catch (Exception exception) {
+        System.out.println(exception.getMessage());
+        throw new RuntimeException(exception.getMessage());
+    }
 
     }
 
